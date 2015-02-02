@@ -75,6 +75,69 @@ Synchronize = ReactiveCommand.CreateAsyncObservable(
 
 When a `ReactiveCommand`'s implementation is too large or too complex for an anonymous delegate, name the implementation's method the same name as the command, but with `Impl` suffixed (for example, `SychronizeImpl` above).
 
+### Async Commands
+
+Prefer using async `ReactiveCommand`'s over the more basic `ReactiveCommand` for all but the most simple tasks.
+
+__Do__
+
+```csharp
+// In XAML
+<Button Command="{Binding Delete}" .../>
+
+public class RepositoryViewModel : ReactiveObject
+{
+  public RepositoryViewModel() 
+  {
+    Delete = ReactiveCommand.CreateAsyncObservable(x => DeleteImpl());
+    Delete.IsExecuting.ToProperty(this, x => x.IsDeleting, out _isDeleting);
+    Delete.ThrownExceptions.Subscribe(ex => /*...*/);
+  }
+
+  public ReactiveCommand<Unit> Delete { get; private set; }
+  
+  readonly ObservableAsPropertyHelper<bool> _isDeleting;
+  public bool IsDeleting { get { return _isDeleting.Value; } }
+
+  public IObservable<Unit> DeleteImpl() {...}
+}
+```
+
+__Don't__
+
+```csharp
+// In XAML
+<Button Command="{Binding Delete}" .../>
+
+public class RepositoryViewModel : ReactiveObject
+{
+  public RepositoryViewModel() 
+  {
+    Delete = ReactiveCommand.Create();
+    // This will block the UI thread while DeleteImpl runs
+    Delete.Subscribe(async _ => await DeleteImpl());
+    // These will not do what you expect
+    Delete.IsExecuting.ToProperty(this, x => x.IsDeleting, out _isDeleting);
+    Delete.ThrownExceptions.Subscribe(ex => /*...*/);
+  }
+
+  public ReactiveCommand<object> Delete { get; private set; }
+  
+  readonly ObservableAsPropertyHelper<bool> _isDeleting;
+  public bool IsDeleting { get { return _isDeleting.Value; } }
+
+  public IObservable<Unit> DeleteImpl() {...}
+}
+```
+
+#### Why
+
+A lot of the power of `ReactiveCommand` comes from the async version. In the basic version the following features do not function as expected:
+
+* `IsExecuting` observable does not include any user code.
+* `ThrownExceptions` will not catch anything.
+* `CanExecute` is not affected if the command is currently executing, leading to the possibilty of multiple execution at the same time.
+
 ### UI Thread and Schedulers
 
 Always make sure to update the UI on the `RxApp.MainThreadScheduler` to ensure UI  changes happen on the UI thread. In practice, this typically means making sure to update view models on the main thread scheduler.
