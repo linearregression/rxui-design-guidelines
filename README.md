@@ -93,8 +93,6 @@ public class RepositoryViewModel : ReactiveObject
     Delete.IsExecuting.ToProperty(this, x => x.IsDeleting, out _isDeleting);
     Delete.ThrownExceptions.Subscribe(ex => this.Log().ErrorException("Something went wrong", ex));
   }
-  
-  public string RepositoryId { get; private set; }
 
   public ReactiveCommand<Unit> Delete { get; private set; }
   
@@ -103,7 +101,7 @@ public class RepositoryViewModel : ReactiveObject
 
   public IObservable<Unit> DeleteImpl()
   {
-    return Observable.Start(() => _repositoryService.Delete(RepositoryId));
+    return Observable.Start(() => /* ... */);
   }
 }
 ```
@@ -131,7 +129,10 @@ public class RepositoryViewModel : ReactiveObject
   readonly ObservableAsPropertyHelper<bool> _isDeleting;
   public bool IsDeleting { get { return _isDeleting.Value; } }
 
-  public IObservable<Unit> DeleteImpl() {...}
+  public IObservable<Unit> DeleteImpl()
+  {
+    return Observable.Start(() => /* ... */);
+  }
 }
 ```
 
