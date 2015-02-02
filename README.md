@@ -93,13 +93,18 @@ public class RepositoryViewModel : ReactiveObject
     Delete.IsExecuting.ToProperty(this, x => x.IsDeleting, out _isDeleting);
     Delete.ThrownExceptions.Subscribe(ex => /*...*/);
   }
+  
+  public string RepositoryId { get; private set; }
 
   public ReactiveCommand<Unit> Delete { get; private set; }
   
   readonly ObservableAsPropertyHelper<bool> _isDeleting;
   public bool IsDeleting { get { return _isDeleting.Value; } }
 
-  public IObservable<Unit> DeleteImpl() {...}
+  public IObservable<Unit> DeleteImpl()
+  {
+    return Observable.Start(() => _repositoryService.Delete(RepositoryId));
+  }
 }
 ```
 
