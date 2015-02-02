@@ -77,7 +77,7 @@ When a `ReactiveCommand`'s implementation is too large or too complex for an ano
 
 ### Async Commands
 
-Prefer using async `ReactiveCommand`'s over the more basic `ReactiveCommand` for all but the most simple tasks.
+Prefer using async `ReactiveCommand`'s over the more basic `ReactiveCommand` for all but the most simple tasks. In ReactiveUI, you should never put Interesting™ code inside the Subscribe block - Subscribe is solely to log the result of operations, or to wire up properties to other properties.
 
 __Do__
 
