@@ -91,7 +91,7 @@ public class RepositoryViewModel : ReactiveObject
   {
     Delete = ReactiveCommand.CreateAsyncObservable(x => DeleteImpl());
     Delete.IsExecuting.ToProperty(this, x => x.IsDeleting, out _isDeleting);
-    Delete.ThrownExceptions.Subscribe(ex => /*...*/);
+    Delete.ThrownExceptions.Subscribe(ex => this.Log().ErrorException("Something went wrong", ex));
   }
   
   public string RepositoryId { get; private set; }
@@ -123,7 +123,7 @@ public class RepositoryViewModel : ReactiveObject
     Delete.Subscribe(async _ => await DeleteImpl());
     // These will not do what you expect
     Delete.IsExecuting.ToProperty(this, x => x.IsDeleting, out _isDeleting);
-    Delete.ThrownExceptions.Subscribe(ex => /*...*/);
+    Delete.ThrownExceptions.Subscribe(ex => this.Log().ErrorException("Something went wrong", ex));
   }
 
   public ReactiveCommand<object> Delete { get; private set; }
